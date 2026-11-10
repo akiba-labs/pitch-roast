@@ -21,7 +21,7 @@ export function SiteFooter() {
               {link.label}
             </Link>
           ))}
-          <a href="https://github.com/sean0007/pitch-roast" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+          <a href="https://github.com/akiba-labs/pitch-roast" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
             Source on GitHub
           </a>
         </div>

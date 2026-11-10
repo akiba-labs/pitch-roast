@@ -39,7 +39,7 @@ export default function HowItWorks() {
       <p className="mt-4 text-lg text-muted">
         Every score comes from a fixed rubric in code. No AI model, no random numbers: the same pitch always gets the same scores,
         lines, verdict, and change. The source is on{" "}
-        <a className="text-flame hover:underline" href="https://github.com/sean0007/pitch-roast" target="_blank" rel="noopener noreferrer">GitHub</a>.
+        <a className="text-flame hover:underline" href="https://github.com/akiba-labs/pitch-roast" target="_blank" rel="noopener noreferrer">GitHub</a>.
       </p>
 
       <section className="mt-10">
