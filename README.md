@@ -4,7 +4,8 @@
 a CTO, your competitor, and a growth lead each score it 1 to 10 with a short roast line. Then you get one verdict and the
 single change that would most improve it.
 
-Live: https://pitch-roast.vercel.app
+- Full app and API (Vercel): https://pitch-roast.vercel.app
+- Roast tool (GitHub Pages): https://akiba-labs.github.io/pitch-roast/
 
 - Free, no login, no database. The pitch lives in the share URL, so nothing is stored.
 - Deterministic and transparent: a fixed rubric in [`lib/roast.ts`](lib/roast.ts), no AI model, no paid API calls.
@@ -32,7 +33,12 @@ npm run dev
 npm test      # rubric + API tests
 npm run lint
 npm run build
+npm run build:pages
 ```
+
+`npm run build` is the Vercel app (roast tool, JSON API, share pages). `npm run build:pages` writes a static `out/` for GitHub Pages and checks that internal links and assets resolve under `/pitch-roast`. Server routes stay in the repo; the Pages script only moves them aside for that build.
+
+GitHub settings: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Pushes to `main` deploy with `.github/workflows/pages.yml`. Pull requests build only. The copy-paste steps for the other tool repos are at the top of `scripts/build-pages.mjs`.
 
 ## Disclaimer
 
