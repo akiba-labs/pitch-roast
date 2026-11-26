@@ -5,21 +5,24 @@ import { RoastForm } from "@/components/roast-form";
 import { scoreColor, verdictColor } from "@/components/roast-result";
 import { EXAMPLES, JUDGES, MAX_PITCH_CHARS, PENALTY_DECAY, VERDICTS, roast } from "@/lib/roast";
 import { RATE_LIMIT } from "@/lib/agent-api";
+import { API_PAUSED_NOTE, isGithubPages, pagesSiteUrl } from "@/lib/hosting";
 import { DISCLAIMER_SHORT, PUBLIC_URL, SITE_NAME, resultPath } from "@/lib/site";
 
 const title = "Roast my startup pitch, free: five judges, one verdict, one change";
 const description =
   "Free tool to roast your startup pitch. Paste it and five judges (a seed VC, a skeptical customer, a CTO, your competitor, and a growth lead) score it 1 to 10, give a verdict, and name the one change worth the most points. No login, no AI model.";
 
+const siteUrl = isGithubPages ? pagesSiteUrl(PUBLIC_URL) : PUBLIC_URL;
+
 export const metadata: Metadata = {
   title: { absolute: `${title} · ${SITE_NAME}` },
   description,
-  alternates: { canonical: `${PUBLIC_URL}/` },
+  alternates: { canonical: `${siteUrl}/` },
   openGraph: {
     title,
     description,
     type: "website",
-    url: `${PUBLIC_URL}/`,
+    url: `${siteUrl}/`,
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image", title, description, images: ["/opengraph-image"] },
@@ -29,7 +32,7 @@ const appJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: SITE_NAME,
-  url: `${PUBLIC_URL}/`,
+  url: `${siteUrl}/`,
   applicationCategory: "BusinessApplication",
   operatingSystem: "Any (web browser)",
   isAccessibleForFree: true,
@@ -70,19 +73,27 @@ const faq: FaqItem[] = [
   },
   {
     q: "What happens to my pitch text?",
-    a: "There is no database, login, or tracking. Your pitch is scored when the result page loads and is not stored. Share links carry the pitch inside the URL, so anyone you send a link to can read it. Don't paste anything confidential.",
+    a: isGithubPages
+      ? "There is no database, login, or tracking. Your pitch is scored in your browser and is not stored. Don't paste anything confidential."
+      : "There is no database, login, or tracking. Your pitch is scored when the result page loads and is not stored. Share links carry the pitch inside the URL, so anyone you send a link to can read it. Don't paste anything confidential.",
   },
   {
     q: "Can I share my roast?",
-    a: `Yes. Every result has its own link (a /r page) with a Copy share link button and a Share on X button. The link carries the pitch, so anyone who opens it sees the same scores, and it shows a preview card with the verdict and total. Example: ${classicUrl}`,
+    a: isGithubPages
+      ? `Roast a pitch on this page. A link to one exact result returns when hosting is back. This page: ${siteUrl}/`
+      : `Yes. Every result has its own link (a /r page) with a Copy share link button and a Share on X button. The link carries the pitch, so anyone who opens it sees the same scores, and it shows a preview card with the verdict and total. Example: ${classicUrl}`,
   },
   {
     q: "Is there an API to roast a pitch?",
-    a: `Yes, free and keyless, with CORS open. GET ${apiExample} or POST ${PUBLIC_URL}/api/roast with a JSON body like {"pitch": "...", "stage": "seed", "category": "b2b-saas"}. It returns the five judge scores and lines, the total, the verdict, the one change, issues, strengths, and a share URL, plus a disclaimer field. Pitches can be up to ${MAX_PITCH_CHARS} characters. Fair use is about ${RATE_LIMIT} requests per minute per IP. The OpenAPI spec is at ${PUBLIC_URL}/openapi.json.`,
+    a: isGithubPages
+      ? API_PAUSED_NOTE
+      : `Yes, free and keyless, with CORS open. GET ${apiExample} or POST ${PUBLIC_URL}/api/roast with a JSON body like {"pitch": "...", "stage": "seed", "category": "b2b-saas"}. It returns the five judge scores and lines, the total, the verdict, the one change, issues, strengths, and a share URL, plus a disclaimer field. Pitches can be up to ${MAX_PITCH_CHARS} characters. Fair use is about ${RATE_LIMIT} requests per minute per IP. The OpenAPI spec is at ${PUBLIC_URL}/openapi.json.`,
   },
   {
     q: "Can my AI assistant roast a pitch through MCP?",
-    a: "Yes. The tool roast_pitch is on the free remote MCP server at https://free-agent-tools.vercel.app/mcp (streamable HTTP, no auth), together with the maker's other free tools. Add that URL to Claude, Cursor, ChatGPT, or another MCP client and ask it to roast your pitch.",
+    a: isGithubPages
+      ? API_PAUSED_NOTE
+      : "Yes. The tool roast_pitch is on the free remote MCP server at https://free-agent-tools.vercel.app/mcp (streamable HTTP, no auth), together with the maker's other free tools. Add that URL to Claude, Cursor, ChatGPT, or another MCP client and ask it to roast your pitch.",
   },
   {
     q: "Is a high score investment advice?",
@@ -110,7 +121,7 @@ export default function HomePage() {
       </section>
 
       <section className="mt-12 grid gap-4 md:grid-cols-[1.1fr_1fr]">
-        <Link href={resultPath(demo.pitch, demo.stage, demo.category)} className="group rounded-3xl border border-line bg-panel/60 p-5 hover:border-flame/50">
+        <Link href={isGithubPages ? "/" : resultPath(demo.pitch, demo.stage, demo.category)} className="group rounded-3xl border border-line bg-panel/60 p-5 hover:border-flame/50">
           <p className="font-mono text-[11px] tracking-[0.28em] text-muted uppercase">Example roast</p>
           <p className="mt-2 text-lg text-foreground">“{demo.pitch}”</p>
           <p className={`mt-3 font-display text-4xl ${verdictColor(r.total)}`}>

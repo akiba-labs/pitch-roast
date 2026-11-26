@@ -2,8 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CATEGORIES, CATEGORY_LABELS, EXAMPLES, STAGES, STAGE_LABELS } from "@/lib/roast";
-import { resultPath } from "@/lib/site";
+import { RoastResultView } from "@/components/roast-result";
+import { ShareBar } from "@/components/share-bar";
+import { isGithubPages, pagesSiteUrl, withBasePath } from "@/lib/hosting";
+import { CATEGORIES, CATEGORY_LABELS, EXAMPLES, STAGES, STAGE_LABELS, parseCategory, parseStage, roast, type RoastResult } from "@/lib/roast";
+import { PUBLIC_URL, resultPath } from "@/lib/site";
 
 const MAX = 600;
 
@@ -13,17 +16,23 @@ export function RoastForm({ initial }: { initial?: { pitch?: string; stage?: str
   const [stage, setStage] = useState(initial?.stage ?? "");
   const [category, setCategory] = useState(initial?.category ?? "");
   const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<RoastResult | null>(null);
   const words = pitch.trim() ? pitch.trim().split(/\s+/).length : 0;
 
-  return (
+  const form = (
     <form
-      action="/r"
+      action={isGithubPages ? withBasePath("/") : "/r"}
       method="get"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!pitch.trim()) return;
+        const text = pitch.trim();
+        if (!text) return;
+        if (isGithubPages) {
+          setResult(roast(text, parseStage(stage), parseCategory(category)));
+          return;
+        }
         setBusy(true);
-        router.push(resultPath(pitch.trim(), stage || null, category || null));
+        router.push(resultPath(text, stage || null, category || null));
       }}
       className="rounded-3xl border border-line bg-panel/70 p-4 sm:p-6"
     >
@@ -111,5 +120,24 @@ export function RoastForm({ initial }: { initial?: { pitch?: string; stage?: str
         </button>
       </div>
     </form>
+  );
+
+  if (!isGithubPages || !result) return form;
+
+  const shareUrl = `${pagesSiteUrl(PUBLIC_URL)}/`;
+  return (
+    <div>
+      {form}
+      <div className="mt-6">
+        <RoastResultView r={result} />
+        <section className="mt-6 rounded-3xl border border-line bg-panel/50 p-5">
+          <h2 className="text-sm font-semibold text-foreground">Share this roast</h2>
+          <p className="mt-1 text-sm text-muted">Share the roast tool. A link to this exact result returns when hosting is back.</p>
+          <div className="mt-3">
+            <ShareBar url={shareUrl} text={`My startup pitch got ${result.total}/50 from five judges: ${result.verdict.label}. Roast yours:`} />
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }

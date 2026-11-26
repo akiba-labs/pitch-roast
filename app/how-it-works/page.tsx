@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { API_PAUSED_NOTE, isGithubPages, withBasePath } from "@/lib/hosting";
 import { EXAMPLES, JUDGES, PENALTY_DECAY, VERDICTS, roast } from "@/lib/roast";
 import { PUBLIC_URL, resultPath } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "How the roast works: the full rubric",
   description: "Pitch Roast scores pitches with a fixed, transparent rubric: specific customer, pain, numbers, traction, wedge, distribution, edge, price, buzzwords, X-for-Y, and blockchain checks. No AI model.",
+  alternates: { canonical: "/how-it-works" },
 };
 
 const SIGNALS: [string, string][] = [
@@ -86,25 +88,37 @@ export default function HowItWorks() {
           When nothing is wrong, it suggests the missing strength worth the most.
         </p>
         <p className="mt-3 text-sm text-muted sm:text-base">
-          Example: <Link className="text-flame hover:underline" href={resultPath(ex.pitch, ex.stage, ex.category)}>a pitch that scores {exR.total}/50</Link>, and{" "}
-          <Link className="text-flame hover:underline" href={resultPath(EXAMPLES[0].pitch, EXAMPLES[0].stage, EXAMPLES[0].category)}>one that doesn&apos;t</Link>.
+          Example: <Link className="text-flame hover:underline" href={isGithubPages ? "/" : resultPath(ex.pitch, ex.stage, ex.category)}>a pitch that scores {exR.total}/50</Link>, and{" "}
+          <Link className="text-flame hover:underline" href={isGithubPages ? "/" : resultPath(EXAMPLES[0].pitch, EXAMPLES[0].stage, EXAMPLES[0].category)}>one that doesn&apos;t</Link>.
         </p>
       </section>
 
       <section id="api" className="mt-10 rounded-3xl border border-line bg-panel/50 p-5">
         <h2 className="font-display text-3xl tracking-tight">Free API for AI agents</h2>
-        <p className="mt-2 text-sm text-muted">No key, no signup, CORS open. GET query parameters or a POST JSON body. Every response includes a disclaimer.</p>
-        <pre className="mt-3 overflow-x-auto rounded-2xl bg-black/50 p-4 text-xs text-foreground">{`curl "${PUBLIC_URL}/api/roast?pitch=Uber%20for%20dog%20walkers%2C%20but%20on%20the%20blockchain.&stage=idea"
+        {isGithubPages ? (
+          <p className="mt-2 text-sm text-muted">
+            {API_PAUSED_NOTE}{" "}
+            <a className="text-flame hover:underline" href={withBasePath("/llms.txt")}>
+              llms.txt
+            </a>{" "}
+            describes the roast tool and the API contract.
+          </p>
+        ) : (
+          <>
+            <p className="mt-2 text-sm text-muted">No key, no signup, CORS open. GET query parameters or a POST JSON body. Every response includes a disclaimer.</p>
+            <pre className="mt-3 overflow-x-auto rounded-2xl bg-black/50 p-4 text-xs text-foreground">{`curl "${PUBLIC_URL}/api/roast?pitch=Uber%20for%20dog%20walkers%2C%20but%20on%20the%20blockchain.&stage=idea"
 
 curl -X POST ${PUBLIC_URL}/api/roast \\
   -H "Content-Type: application/json" \\
   -d '{"pitch":"Dental clinics lose $4,000 a month to no-shows...","stage":"seed"}'`}</pre>
-        <p className="mt-3 text-sm text-muted">
-          <a className="text-flame hover:underline" href="/openapi.json">OpenAPI 3.1</a> ·{" "}
-          <a className="text-flame hover:underline" href="/.well-known/ai-plugin.json">ai-plugin.json</a> ·{" "}
-          <a className="text-flame hover:underline" href="/llms.txt">llms.txt</a> · MCP tool <code>roast_pitch</code> at{" "}
-          <a className="text-flame hover:underline" href="https://free-agent-tools.vercel.app">free-agent-tools.vercel.app/mcp</a>
-        </p>
+            <p className="mt-3 text-sm text-muted">
+              <a className="text-flame hover:underline" href="/openapi.json">OpenAPI 3.1</a> ·{" "}
+              <a className="text-flame hover:underline" href="/.well-known/ai-plugin.json">ai-plugin.json</a> ·{" "}
+              <a className="text-flame hover:underline" href="/llms.txt">llms.txt</a> · MCP tool <code>roast_pitch</code> at{" "}
+              <a className="text-flame hover:underline" href="https://free-agent-tools.vercel.app">free-agent-tools.vercel.app/mcp</a>
+            </p>
+          </>
+        )}
       </section>
     </div>
   );
